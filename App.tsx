@@ -1,12 +1,67 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
 
-export default function App() {
+import React, { Component, useState } from 'react';
+import { StyleSheet, Text, View, Alert, FlatList } from 'react-native';
+
+import Input from './components/Input';
+import List from './components/List';
+import Header from './components/Header';
+
+const Item = ({ word }) => (
+  <View>
+    <List word={word}></List>
+  </View>
+);
+
+const App = () => {
+  const [data, setData] = useState([]);
+
+  const renderItem = ({ item }) => (
+    <Item word={item} />
+  );
+
+  const checkInput = (text) => {
+    if (!text) {
+      Alert.alert(
+        'No item entered',
+        'No item entered',
+        [
+          {
+            text: 'Understood',
+            style: 'cancel',
+          },
+        ],
+        {cancelable: true},
+      );
+    }else{
+      fetch('HOST_OF_SCRABBLE_CHEAT_ENGINE' + text, {
+         method: 'GET',
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        setData(data.names);
+      })
+      .catch((error) => {
+         console.error(error);
+      });
+
+
+    }
+
+  }
+
+
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <Header headerName="Scrabble Cheat"></Header>
+      <Input checkInput={checkInput}></Input>
+
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+      />
+
+      
     </View>
   );
 }
@@ -14,8 +69,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
+
+export default App;
